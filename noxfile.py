@@ -2,7 +2,7 @@
 import nox
 
 
-@nox.session(python=["3.10"])
+@nox.session(python=["3.12"])
 def lint(session):
     """Perform static analysis."""
     session.install("poetry")
