@@ -270,13 +270,23 @@ def extract_gas_fields(file: Path, password: Optional[str]) -> GasBill:
     return GasBill(**match.groupdict())
 
 
-if __name__ == "__main__":
+def main():
+    """Start processing the provided gas bill PDF."""
     import sys
+
+    arg_len = len(sys.argv)
+    if arg_len < 2:
+        print(f"Usage: {sys.argv[0]} BILL_FILE [PASSWORD]")
+        sys.exit(1)
 
     bill = extract_gas_fields(
         Path(sys.argv[1]),
-        sys.argv[2] if len(sys.argv) >= 3 else None,
+        sys.argv[2] if arg_len >= 3 else None,
     )
     bill.validate()
     print(", ".join(map(str, bill.to_header())))
     print(", ".join(map(str, bill.to_row())))
+
+
+if __name__ == "__main__":
+    main()
