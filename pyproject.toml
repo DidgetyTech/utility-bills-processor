@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "bills-analyzer"
+name = "utility-bills-processor"
 version = "0.1.0"
 description = ""
 authors = ["DidgetyTech <32182119+DidgetyTech@users.noreply.github.com>"]
@@ -26,7 +26,7 @@ extend-exclude = ".venv,.mypy_cache"
 python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
-packages = ["bills_analyzer"]
+packages = ["utility_bills_processor"]
 
 [tool.isort]
 profile = "black"
