@@ -1,0 +1,5 @@
+dist
+.mypy_cache
+.nox
+.venv
+__pycache__

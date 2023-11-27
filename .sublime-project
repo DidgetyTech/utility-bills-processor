@@ -1,0 +1,31 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "isorted": {
+            "isort_command": [
+                "poetry",
+                "run",
+                "isort"
+            ],
+            "isort_on_save": true
+        },
+        "LSP": {
+            "LSP-pyright": {
+                "settings": {
+                    "python.venvPath": "${default_dir}/.venv"
+                }
+            }
+        },
+        "SublimeLinter": {
+            "linters": {
+                "flake8": {
+                    "executable": "poetry run flake8",
+                }
+            }
+        }
+    }
+}
