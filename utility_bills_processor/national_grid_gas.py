@@ -3,12 +3,11 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Callable, Generic, List, Optional, TypeVar, Union
+from typing import List, Optional, Union
 
 from pypdf import PdfReader
 
-T = TypeVar("T")
-
+from ._common.dataclass_converters import ConversionDescriptor
 
 __EXAMPLE = """
    CURRENT BILL ITEMIZED      SUMMARY OF CHARGES
@@ -16,7 +15,7 @@ In 29 days you used 2 therms: Total Current Charges    $13.59
 Amount Due Last Bill     15.26
 Aug 18 2023 reading ACTUAL       1481 Your Total Payments Since
 Jul 20 2023 reading ACTUAL        ____     1479   Last Bill. Thank You!    -15.26     ______
-CCF Used for METER# 007030517        2
+CCF Used for METER# gi007030517        2
 DirectPay Amount    $13.59
 Thermal Factor     _______    x1.0289
 Total therms used         2 GAS USE HISTORY
@@ -57,35 +56,6 @@ __PATTERN = (
     r".*TOTAL CURRENT CHARGES.*\$(?P<total_usd>[\.0-9]+)"
     r".*"
 )
-
-
-class ConversionDescriptor(Generic[T]):
-    """A Dataclass-style converter to adapt the value to another value and/or type."""
-
-    def __init__(self, _default: T, converter: Callable[[Any], T]):
-        """
-        Use like a Dataclass field.
-
-        :param _default: the default value if one is not explicitly set
-        :param converter: a function to convert the value to another value and/or type
-        """
-        self._default = _default
-        self._converter = converter
-
-    def __set_name__(self, owner, name):
-        """Invoke by Dataclass."""
-        self._name = "_" + name
-
-    def __get__(self, obj, type):
-        """Invoke by Dataclass."""
-        if obj is None:
-            return self._default
-
-        return getattr(obj, self._name)
-
-    def __set__(self, obj, value):
-        """Invoke by Dataclass."""
-        setattr(obj, self._name, self._converter(value))
 
 
 @dataclass
@@ -266,7 +236,7 @@ def extract_gas_fields(file: Path, password: Optional[str]) -> GasBill:
     text = "\n\n".join((page.extract_text() for page in reader.pages))
     match = re.search(__PATTERN, text, flags=re.DOTALL)
     if match is None:
-        raise RuntimeError(f"Cannot parse bill\n{text}")
+        raise RuntimeError(f"Cannot parse bill. Found text:\n{text}")
     return GasBill(**match.groupdict())
 
 
