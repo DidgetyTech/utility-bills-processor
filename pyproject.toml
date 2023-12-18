@@ -20,6 +20,7 @@ flake8-bugbear = "^23.9.16"
 
 [tool.poetry.scripts]
 gas_bill_processor="utility_bills_processor.national_grid_gas:main"
+water_bill_processor="utility_bills_processor.water_and_sewer:main"
 
 [tool.black]
 target-version = ["py312"]
