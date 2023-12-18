@@ -74,6 +74,13 @@ class WaterBill:
     total: ConversionDescriptor = ConversionDescriptor(_default=0, converter=float)
 
     def validate(self) -> None:
+        """
+        Validate the current properties for consistency.
+
+        This helps to catch extraction errors or change in PDF format.
+
+        Will throw a ValueError if a violation is found.
+        """
         calculated = round(
             self.water_charge
             + self.sewer_charge
@@ -95,6 +102,7 @@ class WaterBill:
         # TODO extract rate to check usage against charges
 
     def to_header(self) -> List[str]:
+        """Return the names of the row values in the same order as ``to_row()``."""
         return [
             "read_date",
             "reading",
@@ -109,6 +117,11 @@ class WaterBill:
         ]
 
     def to_row(self) -> List[str]:
+        """
+        Return a row-based representation of the WaterBill.
+
+        The values match ``to_header()``.
+        """
         return [
             self.read_date,
             self.current_meter_reading,
