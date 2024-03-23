@@ -92,12 +92,12 @@ class WaterBill:
         if self.total != calculated:
             raise ValueError(
                 "Changes don't sum to the total due."
-                + f" water_charge={self.water_charge}"
-                + f" sewer_charge={self.sewer_charge}"
-                + f" past_due={self.past_due}"
-                + f" adjustments={self.adjustments}"
-                + f" interest={self.interest}"
-                + f" => calculated={calculated} != total={self.total}"
+                + f" {self.water_charge=}"
+                + f" {self.sewer_charge=}"
+                + f" {self.past_due=}"
+                + f" {self.adjustments=}"
+                + f" {self.interest=}"
+                + f" => {calculated=} != {self.total=}"
             )
         # TODO extract rate to check usage against charges
 
@@ -161,25 +161,3 @@ def extract_fields(file: Path, password: Optional[str]) -> WaterBill:
             )
         values.update(match.groupdict())
     return WaterBill(**values)
-
-
-def main():
-    """Start processing the provided gas bill PDF."""
-    import sys
-
-    arg_len = len(sys.argv)
-    if arg_len < 2:
-        print(f"Usage: {sys.argv[0]} BILL_FILE [PASSWORD]")
-        sys.exit(1)
-
-    bill = extract_fields(
-        Path(sys.argv[1]),
-        sys.argv[2] if arg_len >= 3 else None,
-    )
-    bill.validate()
-    print(", ".join(map(str, bill.to_header())))
-    print(", ".join(map(str, bill.to_row())))
-
-
-if __name__ == "__main__":
-    main()
