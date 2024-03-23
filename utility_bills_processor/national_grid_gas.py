@@ -1,13 +1,9 @@
-"""Extracts a TSV line (with header line) from a National Grid Gas bill PDF."""
-import logging
-import re
+"""Represents and validates a National Grid Gas bill PDF."""
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import List, Optional, Union
+from typing import ClassVar, override
 
-from pypdf import PdfReader
-
+from ._common.bill import Bill
 from ._common.dataclass_converters import ConversionDescriptor
 
 __EXAMPLE = """
@@ -35,33 +31,9 @@ Paperless Bill Credit         -.38     ______
 TOTAL CURRENT CHARGES    $13.59
 """  # noqa: E501
 
-__PATTERN = (
-    r".*In (?P<days_since_last_reading>\d+) days"
-    r".*(?P<current_date>[a-zA-Z]{3} [0-9]{2} 20\d{2}) reading"
-    r" (?P<current_method>[^\s]*)             (?P<current_meter_reading>\d+)"
-    r".*(?P<previous_date>[a-zA-Z]{3} [0-9]{2} 20\d{2}) reading"
-    r" (?P<previous_method>[^\s]*)"
-    r" *_* *(?P<previous_meter_reading>\d+)"
-    r".*Thermal Factor.*x(?P<thermal_factor>[\.0-9]+)"
-    r".*Total therms used *(?P<total_therms>\d+)"
-    r".*\$(?P<delivery_min_rate_usd>[\.0-9]+) per day for (?P=days_since_last_reading)"
-    r" days"
-    r".*First [\.0-9]+ therms @ \$(?P<delivery_first_tier_rate_usd>[\.0-9]+)"
-    r".*Distribution Adjustment"
-    r".*(?P=total_therms) therms x (?P<delivery_distribution_adjustment_rate>[\.0-9]+)"
-    r" per therm"
-    r".*GAS DELIVERY CHARGE.*\$(?P<delivery_total_usd>[\.0-9]+)"
-    r".*GAS SUPPLY CHARGE"
-    r".*@ \$(?P<supply_rate>[\.0-9]+) /therm"
-    r".*Paperless Bill Credit.*(?P<paperless_bill_credit_usd>-[\.0-9]+)"
-    r".*TOTAL CURRENT CHARGES *\$(?P<total_usd>[\.0-9]+)"
-    r".*(IMPORTANT MESSAGES)?.*(ADDITIONAL MESSAGES)?"
-    r".*"
-)
-
 
 @dataclass
-class GasBill:
+class GasBill(Bill):
     """A Data Object representation of a Gas Bill."""
 
     current_method: str
@@ -108,11 +80,55 @@ class GasBill:
     )
     total_usd: ConversionDescriptor = ConversionDescriptor(_default=0, converter=float)
 
+    # expected by Bill
+    _pattern: ClassVar[tuple[str, ...]] = (
+        (
+            r".*In (?P<days_since_last_reading>\d+) days"
+            r".*(?P<current_date>[a-zA-Z]{3} [0-9]{2} 20\d{2}) reading"
+            r" (?P<current_method>[^\s]*)             (?P<current_meter_reading>\d+)"
+            r".*(?P<previous_date>[a-zA-Z]{3} [0-9]{2} 20\d{2}) reading"
+            r" (?P<previous_method>[^\s]*)"
+            r" *_* *(?P<previous_meter_reading>\d+)"
+            r".*Thermal Factor.*x(?P<thermal_factor>[\.0-9]+)"
+            r".*Total therms used *(?P<total_therms>\d+)"
+            r".*\$(?P<delivery_min_rate_usd>[\.0-9]+) per day for (?P=days_since_last_reading)"
+            r" days"
+            r".*First [\.0-9]+ therms @ \$(?P<delivery_first_tier_rate_usd>[\.0-9]+)"
+            r".*Distribution Adjustment"
+            r".*(?P=total_therms) therms x (?P<delivery_distribution_adjustment_rate>[\.0-9]+)"
+            r" per therm"
+            r".*GAS DELIVERY CHARGE.*\$(?P<delivery_total_usd>[\.0-9]+)"
+            r".*GAS SUPPLY CHARGE"
+            r".*@ \$(?P<supply_rate>[\.0-9]+) /therm"
+            r".*Paperless Bill Credit.*(?P<paperless_bill_credit_usd>-[\.0-9]+)"
+            r".*TOTAL CURRENT CHARGES *\$(?P<total_usd>[\.0-9]+)"
+            r".*(IMPORTANT MESSAGES)?.*(ADDITIONAL MESSAGES)?"
+            r".*"
+        ),
+    )
+    _header: ClassVar[tuple[str, ...]] = (
+        "current_date",
+        "days_since_last_reading",
+        "current_meter_reading",
+        "previous_meter_reading",
+        "thermal_factor",
+        "total_therms_used",
+        "delivery_min_rate_usd",
+        "delivery_first_tier_rate_usd",
+        "delivery_distribution_adjustment_rate",
+        "delivery_total_usd",
+        "supply_rate",
+        "supply_total_usd",
+        "paperless_bill_credit_usd",
+        "total_usd",
+    )
+
     def __post_init__(self):
         """Dataclass method invoked after __init__() to compute derived properties."""
         self.supply_total_usd = round(self.total_therms * self.supply_rate, 2)
 
-    def validate(self):
+    @override
+    def validate(self) -> None:
         """
         Validate the current properties for consistency.
 
@@ -176,32 +192,14 @@ class GasBill:
                 + f" => {calculated=} != {self.total_usd=}"
             )
 
-    def to_header(self) -> List[str]:
-        """Return the names of the row values in the same order as ``to_row()``."""
-        return [
-            "current_date",
-            "days_since_last_reading",
-            "current_meter_reading",
-            "previous_meter_reading",
-            "thermal_factor",
-            "total_therms_used",
-            "delivery_min_rate_usd",
-            "delivery_first_tier_rate_usd",
-            "delivery_distribution_adjustment_rate",
-            "delivery_total_usd",
-            "supply_rate",
-            "supply_total_usd",
-            "paperless_bill_credit_usd",
-            "total_usd",
-        ]
-
-    def to_row(self) -> List[Union[str, int, float]]:
+    @override
+    def to_row(self) -> tuple[str | int | float, ...]:
         """
         Return a row-based representation of the GasBill.
 
         The values match ``to_header()``.
         """
-        return [
+        return (
             self.current_date.isoformat(),
             self.days_since_last_reading,
             self.current_meter_reading,
@@ -216,29 +214,4 @@ class GasBill:
             self.supply_total_usd,
             self.paperless_bill_credit_usd,
             self.total_usd,
-        ]
-
-
-def extract_gas_fields(file: Path, password: Optional[str]) -> GasBill:
-    """
-    Extract a GasBill from the given PDF file.
-
-    :param file: a pointer to a valid PDF file, may be encrypted
-    :param password: the password to unlock an encrypted PDF file
-    :return: a GasBill instance
-    """
-    reader = PdfReader(str(file))
-
-    if reader.is_encrypted:
-        if password is None:
-            raise RuntimeError("Cannot read an encrypted document without a password")
-        reader.decrypt(password)
-
-    text = "\n\n".join((page.extract_text() for page in reader.pages))
-    match = re.search(__PATTERN, text, flags=re.DOTALL)
-    # on the root logger
-    logging.debug(f"Parsed text\n{text}")
-    logging.debug(f"Extracted fields:\n{match.groupdict() if match else None}")
-    if match is None:
-        raise RuntimeError(f"Cannot parse bill. Found text:\n{text}")
-    return GasBill(**match.groupdict())
+        )
