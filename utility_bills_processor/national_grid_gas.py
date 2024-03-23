@@ -1,16 +1,14 @@
 """Extracts a TSV line (with header line) from a National Grid Gas bill PDF."""
+import logging
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional, Sequence, Union
+from typing import List, Optional, Union
 
-import click
 from pypdf import PdfReader
 
 from ._common.dataclass_converters import ConversionDescriptor
-
-__VERBOSE = False
 
 __EXAMPLE = """
    CURRENT BILL ITEMIZED      SUMMARY OF CHARGES
@@ -238,57 +236,9 @@ def extract_gas_fields(file: Path, password: Optional[str]) -> GasBill:
 
     text = "\n\n".join((page.extract_text() for page in reader.pages))
     match = re.search(__PATTERN, text, flags=re.DOTALL)
-    if __VERBOSE:
-        print(text)
-        print(f"{match.groupdict() if match else None}")
+    # on the root logger
+    logging.debug(f"Parsed text\n{text}")
+    logging.debug(f"Extracted fields:\n{match.groupdict() if match else None}")
     if match is None:
         raise RuntimeError(f"Cannot parse bill. Found text:\n{text}")
     return GasBill(**match.groupdict())
-
-
-@click.command()
-@click.option(
-    "-c/-i",
-    "--check/--ignore-checks",
-    default=True,
-    help="Control if extracted values are checked against each other.",
-)
-@click.option("-v", "--verbose", default=False, help="Increase verbosity of output.")
-@click.option(
-    "-p",
-    "--password",
-    prompt=True,
-    prompt_required=False,
-    hide_input=True,
-    help="Use if the file is encrypted.",
-)
-@click.argument(
-    "bill_files",
-    type=click.Path(
-        file_okay=True,
-        readable=True,
-        exists=True,
-        resolve_path=True,
-        path_type=Path,
-    ),
-    nargs=-1,
-)
-def main(bill_files: tuple[Path], password: str | None, check: bool, verbose: bool):
-    """Start processing the provided gas bill PDF."""
-    __VERBOSE = verbose
-    bills = []
-    for bill_file in bill_files:
-        bill = extract_gas_fields(bill_file, password)
-        if check:
-            bill.validate()
-        else:
-            click.secho("Skipping data checks", fg="yellow")
-        bills.append(bill)
-    click.echo("-" * 80)
-    print(", ".join(map(str, bills[0].to_header())))
-    for bill in bills:
-        print(",".join(map(str, bill.to_row())))
-
-
-if __name__ == "__main__":
-    main()
