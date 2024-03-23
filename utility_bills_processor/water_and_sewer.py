@@ -1,12 +1,9 @@
 """Extracts a TSV line (with header line) from my Water/Sewer Bill PDF."""
-import re
 from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
-from typing import List, Optional
+from typing import ClassVar, override
 
-from pypdf import PdfReader
-
+from ._common.bill import Bill
 from ._common.dataclass_converters import ConversionDescriptor
 
 __EXAMPLE = """
@@ -30,25 +27,9 @@ Adjustments          $0.00 \n
 Pay This Amount  \n
 """
 
-__PATTERNS = [
-    (
-        r".*Meter Number Read Date Reading Usage Type Usage Description Charge.*"
-        r"?(?P<read_date>\d\d/\d\d/\d\d\d\d)"
-        r"? +(?P<current_meter_reading>\d+)"
-        r"? +(?P<usage_type>[^ ]+)"
-        r"? +(?P<usage>\d+)"
-    ),
-    (r"WATER +\$(?P<water_charge>\d+.\d{2})"),
-    (r"SEWER +\$(?P<sewer_charge>\d+.\d{2})"),
-    (r"Past Due +\$(?P<past_due>\d+.\d{2})"),
-    (r"Interest +\$(?P<interest>\d+.\d{2})"),
-    (r"Adjustments +\$(?P<adjustments>\d+.\d{2})"),
-    (r"Total Due +\$(?P<total>\d+.\d{2})"),
-]
-
 
 @dataclass
-class WaterBill:
+class WaterBill(Bill):
     """A Data Object representation of a Water Bill."""
 
     usage_type: str
@@ -72,6 +53,34 @@ class WaterBill:
         _default=0, converter=float
     )
     total: ConversionDescriptor = ConversionDescriptor(_default=0, converter=float)
+
+    _patterns: ClassVar[tuple[str, ...]] = (
+        (
+            r".*Meter Number Read Date Reading Usage Type Usage Description Charge.*"
+            r"?(?P<read_date>\d\d/\d\d/\d\d\d\d)"
+            r"? +(?P<current_meter_reading>\d+)"
+            r"? +(?P<usage_type>[^ ]+)"
+            r"? +(?P<usage>\d+)"
+        ),
+        r"WATER +\$(?P<water_charge>\d+.\d{2})",
+        r"SEWER +\$(?P<sewer_charge>\d+.\d{2})",
+        r"Past Due +\$(?P<past_due>\d+.\d{2})",
+        r"Interest +\$(?P<interest>\d+.\d{2})",
+        r"Adjustments +\$(?P<adjustments>\d+.\d{2})",
+        r"Total Due +\$(?P<total>\d+.\d{2})",
+    )
+    _header: ClassVar[tuple[str, ...]] = (
+        "read_date",
+        "reading",
+        "usage_type",
+        "usage",
+        "water_charge_usd",
+        "sewer_charge_usd",
+        "past_due_usd",
+        "adjustments_usd",
+        "interest_usd",
+        "total_usd",
+    )
 
     def validate(self) -> None:
         """
@@ -101,28 +110,14 @@ class WaterBill:
             )
         # TODO extract rate to check usage against charges
 
-    def to_header(self) -> List[str]:
-        """Return the names of the row values in the same order as ``to_row()``."""
-        return [
-            "read_date",
-            "reading",
-            "usage_type",
-            "usage",
-            "water_charge_usd",
-            "sewer_charge_usd",
-            "past_due_usd",
-            "adjustments_usd",
-            "interest_usd",
-            "total_usd",
-        ]
-
-    def to_row(self) -> List[str]:
+    @override
+    def to_row(self) -> tuple[str | int | float, ...]:
         """
         Return a row-based representation of the WaterBill.
 
         The values match ``to_header()``.
         """
-        return [
+        return (
             self.read_date,
             self.current_meter_reading,
             self.usage_type,
@@ -133,31 +128,4 @@ class WaterBill:
             self.interest,
             self.adjustments,
             self.total,
-        ]
-
-
-def extract_fields(file: Path, password: Optional[str]) -> WaterBill:
-    """
-    Extract a WaterBill from the given PDF file.
-
-    :param file: a pointer to a valid PDF file, may be encrypted
-    :param password: the password to unlock an encrypted PDF file
-    :return: a GasBill instance
-    """
-    reader = PdfReader(str(file))
-
-    if reader.is_encrypted:
-        if password is None:
-            raise RuntimeError("Cannot read an encrypted document without a password")
-        reader.decrypt(password)
-
-    text = "\n\n".join((page.extract_text() for page in reader.pages))
-    values = {}
-    for pattern in __PATTERNS:
-        match = re.search(pattern, text, flags=re.DOTALL)
-        if match is None:
-            raise RuntimeError(
-                f"Cannot parse bill with pattern: '{pattern}'. Found text:\n{text}"
-            )
-        values.update(match.groupdict())
-    return WaterBill(**values)
+        )

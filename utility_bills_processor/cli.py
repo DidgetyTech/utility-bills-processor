@@ -1,11 +1,13 @@
 """The CLI for this package."""
 import logging
 from pathlib import Path
-from typing import Final
+from typing import Final, Type
 
 import click
 import colorlog
 from colorlog import escape_codes
+
+from ._common.bill import Bill
 
 _RESET_COLOR: Final[str] = escape_codes.escape_codes["reset"]
 
@@ -34,112 +36,73 @@ def _configure_logging():
 _configure_logging()
 
 
+def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
+    @click.command()
+    @click.option(
+        "-c/-i",
+        "--check/--ignore-checks",
+        default=True,
+        help="Control if extracted values are checked against each other.",
+    )
+    @click.option(
+        "-p",
+        "--password",
+        prompt=True,
+        prompt_required=False,
+        hide_input=True,
+        help="Use if the file is encrypted.",
+    )
+    @click.argument(
+        "bill_files",
+        type=click.Path(
+            file_okay=True,
+            readable=True,
+            exists=True,
+            resolve_path=True,
+            path_type=Path,
+        ),
+        nargs=-1,
+    )
+    def command(bill_files: tuple[Path], password: str | None, check: bool):
+        """Process gas bills."""
+        bills = []
+        for bill_file in bill_files:
+            try:
+                bill = bill_subtype.extract_fields(bill_file, password)
+                if check:
+                    bill.validate()
+                else:
+                    click.secho("Skipping data checks", fg="yellow")
+                bills.append(bill)
+
+            except RuntimeError as error:
+                message = f"Failed to process as a {scope} bill: {str(bill_file)}"
+                logging.error(f"{message}{_RESET_COLOR} {str(error)}")
+                raise click.ClickException(message) from error
+        click.echo("-" * 80)
+        print(", ".join(map(str, bills[0].to_header())))
+        for bill in bills:
+            print(",".join(map(str, bill.to_row())))
+
+    return command
+
+
 @click.group()
 @click.option(
     "-v", "--verbose", is_flag=True, default=False, help="Increase verbosity of output."
 )
 def cli(verbose: bool):
-    """The root CLI definition."""
+    """Configure global options."""
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
 
-@cli.command()
-@click.option(
-    "-c/-i",
-    "--check/--ignore-checks",
-    default=True,
-    help="Control if extracted values are checked against each other.",
-)
-@click.option(
-    "-p",
-    "--password",
-    prompt=True,
-    prompt_required=False,
-    hide_input=True,
-    help="Use if the file is encrypted.",
-)
-@click.argument(
-    "bill_files",
-    type=click.Path(
-        file_okay=True,
-        readable=True,
-        exists=True,
-        resolve_path=True,
-        path_type=Path,
-    ),
-    nargs=-1,
-)
-def gas(bill_files: tuple[Path], password: str | None, check: bool):
-    """Process gas bills."""
-    from .national_grid_gas import extract_gas_fields
+def _generate_commands():
+    from .national_grid_gas import GasBill
+    from .water_and_sewer import WaterBill
 
-    bills = []
-    for bill_file in bill_files:
-        try:
-            bill = extract_gas_fields(bill_file, password)
-            if check:
-                bill.validate()
-            else:
-                click.secho("Skipping data checks", fg="yellow")
-            bills.append(bill)
-
-        except RuntimeError as error:
-            message = f"Failed to process as a gas bill: {str(bill_file)}"
-            logging.error(f"{message}{_RESET_COLOR} {str(error)}")
-            raise click.ClickException(message) from error
-    click.echo("-" * 80)
-    print(", ".join(map(str, bills[0].to_header())))
-    for bill in bills:
-        print(",".join(map(str, bill.to_row())))
+    cli.add_command(_base_command("gas", GasBill), "gas")
+    cli.add_command(_base_command("water", WaterBill), "water")
 
 
-@cli.command()
-@click.option(
-    "-c/-i",
-    "--check/--ignore-checks",
-    default=True,
-    help="Control if extracted values are checked against each other.",
-)
-@click.option(
-    "-p",
-    "--password",
-    prompt=True,
-    prompt_required=False,
-    hide_input=True,
-    help="Use if the file is encrypted.",
-)
-@click.argument(
-    "bill_files",
-    type=click.Path(
-        file_okay=True,
-        readable=True,
-        exists=True,
-        resolve_path=True,
-        path_type=Path,
-    ),
-    nargs=-1,
-)
-def water(bill_files: tuple[Path], password: str | None, check: bool) -> int:
-    """Process water and sewer bills."""
-    from .water_and_sewer import extract_fields
-
-    bills = []
-    for bill_file in bill_files:
-        try:
-            bill = extract_fields(bill_file, password)
-            if check:
-                bill.validate()
-            else:
-                click.secho("Skipping data checks", fg="yellow")
-            bills.append(bill)
-        except RuntimeError as error:
-            message = f"Failed to process as a water and sewer bill: {str(bill_file)}"
-            logging.error(f"{message}{_RESET_COLOR} {str(error)}")
-            raise click.ClickException(message) from error
-    click.echo("-" * 80)
-    print(", ".join(map(str, bills[0].to_header())))
-    for bill in bills:
-        print(",".join(map(str, bill.to_row())))
-
-    return 0
+_generate_commands()
