@@ -81,7 +81,7 @@ class GasBill(Bill):
     total_usd: ConversionDescriptor = ConversionDescriptor(_default=0, converter=float)
 
     # expected by Bill
-    _pattern: ClassVar[tuple[str, ...]] = (
+    _patterns: ClassVar[tuple[str, ...]] = (
         (
             r".*In (?P<days_since_last_reading>\d+) days"
             r".*(?P<current_date>[a-zA-Z]{3} [0-9]{2} 20\d{2}) reading"
