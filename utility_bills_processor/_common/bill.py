@@ -41,7 +41,7 @@ class Bill:
         return cls._header
 
     @classmethod
-    def extract_fields(cls, file: Path, password: str | None) -> "Bill":
+    def extract_fields(cls, file: Path, password: str | None = None) -> "Bill":
         """
         Extract a GasBill from the given PDF file.
 
