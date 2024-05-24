@@ -1,7 +1,7 @@
 """The CLI for this package."""
 import logging
 from pathlib import Path
-from typing import Final, Type
+from typing import Final, Required, Type
 
 import click
 import colorlog
@@ -37,7 +37,7 @@ _configure_logging()
 
 
 def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
-    @click.command()
+    @click.command(short_help=f"Process {scope} bills.")
     @click.option(
         "-c/-i",
         "--check/--ignore-checks",
@@ -62,9 +62,13 @@ def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
             path_type=Path,
         ),
         nargs=-1,
+        required=True,
     )
-    def command(bill_files: tuple[Path], password: str | None, check: bool):
-        """Process gas bills."""
+    def command(
+        bill_files: tuple[Path],
+        password: str | None,
+        check: bool,
+    ):
         bills = []
         for bill_file in bill_files:
             try:

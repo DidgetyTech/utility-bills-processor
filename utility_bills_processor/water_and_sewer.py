@@ -82,6 +82,7 @@ class WaterBill(Bill):
         "total_usd",
     )
 
+    @override
     def validate(self) -> None:
         """
         Validate the current properties for consistency.
