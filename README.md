@@ -3,7 +3,8 @@
 A collection of scripts to extract structured data from utility bills.
 
 ```sh
-poetry run gas_bill_processor path/to/file.pdf [password]
+poetry run process_utility_bill gas path/to/file.pdf [password]
+poetry run process_utility_bill --help
 ```
 
 ## Development
