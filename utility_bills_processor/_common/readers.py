@@ -1,4 +1,5 @@
 """Functions to parse files."""
+
 from pathlib import Path
 
 from pypdf import PdfReader

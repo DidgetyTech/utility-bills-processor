@@ -1,4 +1,5 @@
 """Extracts a TSV line (with header line) from my Water/Sewer Bill PDF."""
+
 from dataclasses import dataclass
 from datetime import datetime
 from typing import ClassVar, override

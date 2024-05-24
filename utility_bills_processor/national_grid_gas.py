@@ -1,4 +1,5 @@
 """Represents and validates a National Grid Gas bill PDF."""
+
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import ClassVar, override

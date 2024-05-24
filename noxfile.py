@@ -5,11 +5,11 @@ import nox
 @nox.session(python=["3.12"])
 def lint(session):
     """Perform static analysis."""
+    session.install("pre-commit")
     session.install("poetry")
     session.run("poetry", "install", "--with=dev")
-    session.run("isort", ".")
-    session.run("black", ".")
-    session.run("flake8")
+    session.run("pre-commit", "install")
+    session.run("pre-commit", "run", "--all")
     session.run("mypy", "--config-file", "pyproject.toml")
 
 

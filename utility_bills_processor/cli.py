@@ -1,4 +1,5 @@
 """The CLI for this package."""
+
 import logging
 from pathlib import Path
 from typing import Final, Type

@@ -1,5 +1,5 @@
 [flake8]
-extend-exclude = 
+extend-exclude =
 	.mypy_cache,
 	.venv,
 	dist,
