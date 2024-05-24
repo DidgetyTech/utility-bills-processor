@@ -1,7 +1,7 @@
 """The CLI for this package."""
 import logging
 from pathlib import Path
-from typing import Final, Required, Type
+from typing import Final, Type
 
 import click
 import colorlog

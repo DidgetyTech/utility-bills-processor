@@ -2,7 +2,12 @@
 extend-exclude = 
 	.mypy_cache,
 	.venv,
-	dist
+	dist,
+	__pycache__,
+	.nox,
+
+per-file-ignores =
+    tests/*.py:D
 
 # black compatibility
 # https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#flake8
