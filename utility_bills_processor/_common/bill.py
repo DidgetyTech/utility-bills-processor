@@ -43,7 +43,7 @@ class Bill:
     @classmethod
     def extract_fields(cls, file: Path, password: str | None = None) -> "Bill":
         """
-        Extract a GasBill from the given PDF file.
+        Extract a Bill from the given PDF file.
 
         :param file: a pointer to a valid PDF file, may be encrypted
         :param password: the password to unlock an encrypted PDF file

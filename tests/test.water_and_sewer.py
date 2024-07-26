@@ -10,7 +10,7 @@ MUNICIPAL_BILL_PATH = DATA_ROOT.joinpath("municipal-water-sewer.pdf")
 
 class WaterBillTest(TestCase):
     def test_extract_fields(self) -> None:
-        bill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)
+        bill: WaterBill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)  # type: ignore[assignment]
         assert isinstance(bill, WaterBill)
         self.assertEqual(bill.adjustments, 0.0)
         self.assertEqual(bill.current_meter_reading, 743)
@@ -29,7 +29,7 @@ class WaterBillTest(TestCase):
         bill.validate()
 
     def test_validate_inaccurate_total(self) -> None:
-        bill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)
+        bill: WaterBill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)  # type: ignore[assignment]
         bill.total = -100
         with self.assertRaises(ValueError):
             bill.validate()
@@ -52,7 +52,7 @@ class WaterBillTest(TestCase):
         )
 
     def test_to_row(self) -> None:
-        bill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)
+        bill: WaterBill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)  # type: ignore[assignment]
         self.assertEqual(
             bill.to_row(),
             (

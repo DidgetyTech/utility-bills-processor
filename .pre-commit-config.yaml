@@ -6,8 +6,15 @@ repos:
     hooks:
     - id: check-hooks-apply
     - id: check-useless-excludes
+-   repo: https://github.com/python-poetry/poetry
+    rev: '1.8.3'
+    hooks:
+    -   id: poetry-check
+    -   id: poetry-lock
+    -   id: poetry-export
+    -   id: poetry-install
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.1.0  # this is optional, use `pre-commit autoupdate` to get the latest rev!
+    rev: v4.6.0
     hooks:
     -   id: check-yaml
     -   id: check-toml
@@ -37,8 +44,18 @@ repos:
     hooks:
     -   id: flake8
         name: flake8
+        additional_dependencies:
+        - flake8-bugbear==24.4.26
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: 'v1.10.0'
     hooks:
     -   id: mypy
-        args: [--config-file=pyproject.toml]
+        args:
+        - --config-file=pyproject.toml
+        additional_dependencies:
+        # duplicate of pyproject.toml [tool.poetry.dependencies]
+        - pypdf==3.16
+        - click==8.1.7
+        - colorlog==6.8.2
+        # duplicate of pyproject.toml [tool.poetry.group.dev.dependencies]
+        - nox==2023.4.22
