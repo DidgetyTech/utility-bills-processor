@@ -67,7 +67,7 @@ def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
         bill_files: tuple[Path],
         password: str | None,
         check: bool,
-    ):
+    ) -> None:
         bills = []
         for bill_file in bill_files:
             try:
@@ -95,13 +95,13 @@ def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
 @click.option(
     "-v", "--verbose", is_flag=True, default=False, help="Increase verbosity of output."
 )
-def process_utility_bill(verbose: bool):
+def process_utility_bill(verbose: bool) -> None:
     """A script to process home utility bills into a CSV format."""
     # This function configures global options and settings.
     _configure_logging(level=logging.DEBUG if verbose else logging.INFO)
 
 
-def _generate_commands():
+def _generate_commands() -> None:
     from .national_grid_gas import GasBill
     from .water_and_sewer import WaterBill
 

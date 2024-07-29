@@ -23,15 +23,25 @@ pytest = "^8.3.2"
 coverage = {extras = ["toml"], version = "^7.6.0"}
 pytest-cov = "^5.0.0"
 
+[tool.poetry.group.ide.dependencies]
+mypy = "^1.11.0"
+nox = "^2023.4.22"
+nox-poetry = "^1.0.3"
+
 [tool.black]
 target-version = ["py312"]
 extend-exclude = ".venv,.mypy_cache"
 
 [tool.mypy]
+packages = ["utility_bills_processor"]
 python_version = "3.12"
+check_untyped_defs = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
 warn_return_any = true
 warn_unused_configs = true
-packages = ["utility_bills_processor"]
 
 [tool.isort]
 profile = "black"

@@ -18,17 +18,17 @@ class ConversionDescriptor(Generic[T]):
         self._default = _default
         self._converter = converter
 
-    def __set_name__(self, owner, name):
+    def __set_name__(self, owner: Any, name: str) -> None:
         """Invoke by Dataclass."""
         self._name = "_" + name
 
-    def __get__(self, obj, type):
+    def __get__(self, obj: Any, type: type) -> T:
         """Invoke by Dataclass."""
         if obj is None:
             return self._default
 
-        return getattr(obj, self._name)
+        return getattr(obj, self._name)  # type: ignore[no-any-return]
 
-    def __set__(self, obj, value):
+    def __set__(self, obj: Any, value: Any) -> None:
         """Invoke by Dataclass."""
         setattr(obj, self._name, self._converter(value))

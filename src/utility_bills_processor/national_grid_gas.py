@@ -125,7 +125,7 @@ class GasBill(Bill):
         "total_usd",
     )
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Dataclass method invoked after __init__() to compute derived properties."""
         self.supply_total_usd = round(self.total_therms * self.supply_rate, 2)
 
