@@ -1,5 +1,8 @@
-dist
-.mypy_cache
-.nox
-.venv
-__pycache__
+/.coverage
+/.mypy_cache/
+/.nox/
+/.pytest_cache/
+/.venv/
+/dist/
+/src/*.egg-info/
+__pycache__/

@@ -20,6 +20,8 @@ colorlog = "^6.8.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
+coverage = {extras = ["toml"], version = "^7.6.0"}
+pytest-cov = "^5.0.0"
 
 [tool.black]
 target-version = ["py312"]
@@ -36,3 +38,13 @@ profile = "black"
 skip_gitignore = true
 include_trailing_comma = true
 color_output = true
+
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+
+[tool.coverage.run]
+branch = true
+source = ["utility_bills_processor"]
+
+[tool.coverage.report]
+show_missing = true
