@@ -12,7 +12,7 @@ click = "^8.1.7"
 colorlog = "^6.8.2"
 
 [tool.poetry.scripts]
-process_utility_bill="utility_bills_processor.cli:cli"
+process-utility-bill="utility_bills_processor.cli:process_utility_bill"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"

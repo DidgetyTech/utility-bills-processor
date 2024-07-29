@@ -8,12 +8,13 @@ import click
 import colorlog
 from colorlog import escape_codes
 
+from . import __version__
 from ._common.bill import Bill
 
 _RESET_COLOR: Final[str] = escape_codes.escape_codes["reset"]
 
 
-def _configure_logging():
+def _configure_logging(level: int = logging.INFO) -> None:
     handler = logging.StreamHandler()
     handler.setFormatter(
         colorlog.ColoredFormatter(
@@ -32,9 +33,6 @@ def _configure_logging():
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
-
-
-_configure_logging()
 
 
 def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
@@ -93,21 +91,22 @@ def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
 
 
 @click.group()
+@click.version_option(version=__version__)
 @click.option(
     "-v", "--verbose", is_flag=True, default=False, help="Increase verbosity of output."
 )
-def cli(verbose: bool):
-    """Configure global options."""
-    if verbose:
-        logging.getLogger().setLevel(logging.DEBUG)
+def process_utility_bill(verbose: bool):
+    """A script to process home utility bills into a CSV format."""
+    # This function configures global options and settings.
+    _configure_logging(level=logging.DEBUG if verbose else logging.INFO)
 
 
 def _generate_commands():
     from .national_grid_gas import GasBill
     from .water_and_sewer import WaterBill
 
-    cli.add_command(_base_command("gas", GasBill), "gas")
-    cli.add_command(_base_command("water", WaterBill), "water")
+    process_utility_bill.add_command(_base_command("gas", GasBill), "gas")
+    process_utility_bill.add_command(_base_command("water", WaterBill), "water")
 
 
 _generate_commands()
