@@ -5,14 +5,18 @@ description = ""
 authors = ["DidgetyTech <32182119+DidgetyTech@users.noreply.github.com>"]
 readme = "README.md"
 
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+process-utility-bill="utility_bills_processor.cli:process_utility_bill"
+
 [tool.poetry.dependencies]
 python = "^3.12"
 pypdf = "^3.16"
 click = "^8.1.7"
 colorlog = "^6.8.2"
-
-[tool.poetry.scripts]
-process-utility-bill="utility_bills_processor.cli:process_utility_bill"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
@@ -32,7 +36,3 @@ profile = "black"
 skip_gitignore = true
 include_trailing_comma = true
 color_output = true
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
