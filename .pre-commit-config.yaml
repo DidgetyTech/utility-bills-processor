@@ -45,6 +45,7 @@ repos:
     -   id: flake8
         name: flake8
         additional_dependencies:
+        - flake8-bandit==4.1.1
         - flake8-bugbear==24.4.26
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: 'v1.10.0'
@@ -62,3 +63,11 @@ repos:
         # for noxfile. these should be installed with ./scripts/setup_repo.sh
         - nox==2023.4.22
         - nox-poetry==1.0.3
+-   repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.3
+    hooks:
+    -   id: python-safety-dependencies-check
+        name: safety
+        files: pyproject.toml
+        args:
+        - "--groups=dev"
