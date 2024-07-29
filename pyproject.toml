@@ -11,11 +11,11 @@ pypdf = "^3.16"
 click = "^8.1.7"
 colorlog = "^6.8.2"
 
-[tool.poetry.group.dev.dependencies]
-nox = "^2023.4.22"
-
 [tool.poetry.scripts]
 process_utility_bill="utility_bills_processor.cli:cli"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
 
 [tool.black]
 target-version = ["py312"]
@@ -31,7 +31,6 @@ packages = ["utility_bills_processor"]
 profile = "black"
 skip_gitignore = true
 include_trailing_comma = true
-#virtual_env = .venv
 color_output = true
 
 [build-system]

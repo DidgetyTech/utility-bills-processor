@@ -57,5 +57,8 @@ repos:
         - pypdf==3.16
         - click==8.1.7
         - colorlog==6.8.2
-        # duplicate of pyproject.toml [tool.poetry.group.dev.dependencies]
+        # for noxfile. these should be installed with
+        # pipx install nox
+        # pipx inject nox nox-poetry
         - nox==2023.4.22
+        - nox-poetry==1.0.3
