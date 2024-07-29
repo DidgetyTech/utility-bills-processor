@@ -6,7 +6,14 @@ from pypdf import PdfReader
 
 
 def read_pdf(file: Path, password: str | None) -> str:
-    """Read PDF file that could be encrypted."""
+    """Read PDF file that could be encrypted.
+
+    Returns:
+        the contents of the PDF file as text
+
+    Raises:
+        RuntimeError: if the file is encrypted but no password was provided
+    """
     reader = PdfReader(str(file))
 
     if reader.is_encrypted:

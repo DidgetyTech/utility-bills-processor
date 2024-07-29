@@ -1,3 +1,5 @@
+"""Control file for automation beyond pre-commit."""
+
 from nox_poetry import Session, session
 
 

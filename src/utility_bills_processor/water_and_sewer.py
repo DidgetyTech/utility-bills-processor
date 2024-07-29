@@ -84,14 +84,7 @@ class WaterBill(Bill):
     )
 
     @override
-    def validate(self) -> None:
-        """
-        Validate the current properties for consistency.
-
-        This helps to catch extraction errors or change in PDF format.
-
-        Will throw a ValueError if a violation is found.
-        """
+    def validate(self) -> None:  # noqa: D102
         calculated = round(
             self.water_charge
             + self.sewer_charge
@@ -113,12 +106,7 @@ class WaterBill(Bill):
         # TODO extract rate to check usage against charges
 
     @override
-    def to_row(self) -> tuple[str | int | float, ...]:
-        """
-        Return a row-based representation of the WaterBill.
-
-        The values match ``to_header()``.
-        """
+    def to_row(self) -> tuple[str | int | float, ...]:  # noqa: D102
         return (
             self.read_date,
             self.current_meter_reading,

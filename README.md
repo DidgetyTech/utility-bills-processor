@@ -37,3 +37,17 @@ Sublime Text
 * Python Black
 * isort
 * Markdown Preview
+
+### Code and documentation styles
+
+For the most part, the styles are enforced with tools integrated into `pre-commit`.
+
+docstring: [google](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings)
+
+> Here are three useful guidelines about documenting test cases:
+>
+> 1. State the expected behaviour and be specific about it.
+> 2. Omit everything that already follows from the fact that it is a test case. For example, avoid words like “test if”, “correctly”, “should”.
+> 3. Use “it” to refer to the system under test. There is no need to repeatedly name the function or class you are testing. (A better place for that is the docstring of the test module, or the test class if you use those.)
+>
+> https://cjolowicz.github.io/posts/hypermodern-python-05-documentation/#adding-docstrings-to-the-test-suite

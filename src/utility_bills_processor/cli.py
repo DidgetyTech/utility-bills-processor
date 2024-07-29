@@ -36,12 +36,24 @@ def _configure_logging(level: int = logging.INFO) -> None:
 
 
 def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
+    """A factory function for defining bill processing commands.
+
+    This function ensures consistent parameters and behavior of those parameters.
+
+    Args:
+        scope: the text name of the bill, e.g. gas
+        bill_subtype: the concrete class that represents the bill, e.g. GasBill
+
+    Returns:
+        a function decorated by `@click.command` that will be invoked based on CLI parameters
+    """
+
     @click.command(short_help=f"Process {scope} bills.")
     @click.option(
         "-c/-i",
         "--check/--ignore-checks",
         default=True,
-        help="Control if extracted values are checked against each other.",
+        help="Control if extracted values per bill are checked against each other.",
     )
     @click.option(
         "-p",
@@ -49,7 +61,7 @@ def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
         prompt=True,
         prompt_required=False,
         hide_input=True,
-        help="Use if the file is encrypted.",
+        help="Use if the file(s) are encrypted.",
     )
     @click.argument(
         "bill_files",
@@ -62,6 +74,7 @@ def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
         ),
         nargs=-1,
         required=True,
+        help="The file paths of the PDFs to process.",
     )
     def command(
         bill_files: tuple[Path],
@@ -102,6 +115,7 @@ def process_utility_bill(verbose: bool) -> None:
 
 
 def _generate_commands() -> None:
+    # Defer importing bill classes as long as possible.
     from .national_grid_gas import GasBill
     from .water_and_sewer import WaterBill
 

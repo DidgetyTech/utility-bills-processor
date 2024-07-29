@@ -13,7 +13,7 @@ In 29 days you used 2 therms: Total Current Charges    $13.59
 Amount Due Last Bill     15.26
 Aug 18 2023 reading ACTUAL       1481 Your Total Payments Since
 Jul 20 2023 reading ACTUAL        ____     1479   Last Bill. Thank You!    -15.26     ______
-CCF Used for METER# gi007030517        2
+CCF Used for METER# 007030517        2
 DirectPay Amount    $13.59
 Thermal Factor     _______    x1.0289
 Total therms used         2 GAS USE HISTORY
@@ -130,14 +130,7 @@ class GasBill(Bill):
         self.supply_total_usd = round(self.total_therms * self.supply_rate, 2)
 
     @override
-    def validate(self) -> None:
-        """
-        Validate the current properties for consistency.
-
-        This helps to catch extraction errors or change in PDF format.
-
-        Will throw a ValueError if a violation is found.
-        """
+    def validate(self) -> None:  # noqa: D102
         calculated = self.current_date - self.previous_date
         if calculated != timedelta(days=self.days_since_last_reading):
             raise ValueError(
@@ -195,12 +188,7 @@ class GasBill(Bill):
             )
 
     @override
-    def to_row(self) -> tuple[str | int | float, ...]:
-        """
-        Return a row-based representation of the GasBill.
-
-        The values match ``to_header()``.
-        """
+    def to_row(self) -> tuple[str | int | float, ...]:  # noqa: D102
         return (
             self.current_date.isoformat(),
             self.days_since_last_reading,

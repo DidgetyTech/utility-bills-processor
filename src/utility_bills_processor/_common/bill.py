@@ -1,4 +1,6 @@
-import logging  # noqa: D100
+"""Contains the base Bill class for all utility bills."""
+
+import logging
 import re
 from abc import abstractmethod
 from pathlib import Path
@@ -8,46 +10,50 @@ from .readers import read_pdf
 
 
 class Bill:
-    """The relevant fields of a PDF bill."""
+    """The validated relevant fields of a PDF bill."""
 
     _patterns: ClassVar[tuple[str, ...]] = ("NOT SET ON SUBCLASS",)
     _header: ClassVar[tuple[str, ...]] = ("NOT SET ON SUBCLASS",)
 
     @abstractmethod
     def validate(self) -> None:
-        """
-        Validate the fields.
+        """Validate the fields.
 
-        Raises ValueError if the validation fails.
+        Raises:
+            ValueError: if any data integrity issues are found
         """
         pass
 
     @abstractmethod
     def to_row(self) -> tuple[str | int | float, ...]:
-        """
-        Produce a TSV/CSV style row of all the fields.
+        """Produce a TSV/CSV style row of all the fields.
 
         Order of the fields must match `to_header()`.
+
+        Returns:
+            a tuple of field values in the order of `to_header()`.
         """
         pass
 
     @classmethod
     def to_header(cls) -> tuple[str, ...]:
-        """
-        Produce a TSV/CSV style row of header names.
+        """Produce a TSV/CSV style row of header names.
 
-        Order of the header names must match `to_row()`.
+        Returns:
+            a tuple of field values in the order of `to_row()`.
         """
         return cls._header
 
     @classmethod
     def extract_fields(cls, file: Path, password: str | None = None) -> "Bill":
-        """
-        Extract a Bill from the given PDF file.
+        """Extract a Bill from the given PDF file.
 
-        :param file: a pointer to a valid PDF file, may be encrypted
-        :param password: the password to unlock an encrypted PDF file
-        :return: a GasBill instance
+        Args:
+            file: a pointer to a valid PDF file, may be encrypted
+            password: the password to unlock an encrypted PDF file
+
+        Returns:
+            a GasBill instance
         """
         text = read_pdf(file, password)
 

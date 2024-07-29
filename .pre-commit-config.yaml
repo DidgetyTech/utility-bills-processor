@@ -47,6 +47,7 @@ repos:
         additional_dependencies:
         - flake8-bandit==4.1.1
         - flake8-bugbear==24.4.26
+        - flake8-docstrings==1.7.0
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: 'v1.10.0'
     hooks:
@@ -70,4 +71,4 @@ repos:
         name: safety
         files: pyproject.toml
         args:
-        - "--groups=dev"
+        - "--groups=dev,ide"
