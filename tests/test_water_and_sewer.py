@@ -1,3 +1,5 @@
+"""The WaterBill extracts, validates, and outputs the data correctly."""
+
 from datetime import date
 from pathlib import Path
 from unittest import TestCase, main
@@ -9,7 +11,10 @@ MUNICIPAL_BILL_PATH = DATA_ROOT.joinpath("municipal-water-sewer.pdf")
 
 
 class WaterBillTest(TestCase):
+    """The WaterBill extracts, validates, and outputs the data correctly."""
+
     def test_extract_fields(self) -> None:
+        """It extracts all the fields correctly from a real (redacted) PDF."""
         bill: WaterBill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)  # type: ignore[assignment]
         assert isinstance(bill, WaterBill)
         self.assertEqual(bill.adjustments, 0.0)
@@ -24,17 +29,20 @@ class WaterBillTest(TestCase):
         self.assertEqual(bill.water_charge, 2.70)
 
     def test_validate(self) -> None:
+        """It validates all the fields correctly from a real (redacted) PDF."""
         bill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)
         # doesn't raise an exception
         bill.validate()
 
     def test_validate_inaccurate_total(self) -> None:
+        """It finds an issue when the total doesn't match the line values."""
         bill: WaterBill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)  # type: ignore[assignment]
         bill.total = -100
         with self.assertRaises(ValueError):
             bill.validate()
 
     def test_to_header(self) -> None:
+        """It validates the header is in the correct order and correct set."""
         self.assertEqual(
             WaterBill.to_header(),
             (
@@ -52,6 +60,7 @@ class WaterBillTest(TestCase):
         )
 
     def test_to_row(self) -> None:
+        """It validates that the row has the correct values in the correct order."""
         bill: WaterBill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)  # type: ignore[assignment]
         self.assertEqual(
             bill.to_row(),

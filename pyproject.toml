@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "utility-bills-processor"
 version = "0.1.0"
-description = ""
+description = "A tool to process utility bills into data."
 authors = ["DidgetyTech <32182119+DidgetyTech@users.noreply.github.com>"]
 readme = "README.md"
 
@@ -37,6 +37,7 @@ target-version = ["py312"]
 extend-exclude = ".venv,.mypy_cache"
 
 [tool.mypy]
+mypy_path = "$MYPY_CONFIG_FILE_DIR/src"
 packages = ["utility_bills_processor"]
 python_version = "3.12"
 check_untyped_defs = true

@@ -7,7 +7,7 @@ extend-exclude =
 	__pycache__,
 
 per-file-ignores =
-    tests/*.py:D,S101
+    tests/*.py:S101
 
 # black compatibility
 # https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#flake8
