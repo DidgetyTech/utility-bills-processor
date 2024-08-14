@@ -74,13 +74,16 @@ def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
         ),
         nargs=-1,
         required=True,
-        help="The file paths of the PDFs to process.",
     )
     def command(
         bill_files: tuple[Path],
         password: str | None,
         check: bool,
     ) -> None:
+        """Extract data from BILL_FILES.
+
+        A BILL_FILE must be PDF and may be encrypted. Use --password to decrypt.
+        """
         bills = []
         for bill_file in bill_files:
             try:
@@ -103,7 +106,12 @@ def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
     return command
 
 
-@click.group()
+CONTEXT_SETTINGS = {
+    "help_option_names": ["-h", "--help"],
+}
+
+
+@click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option(version=__version__)
 @click.option(
     "-v", "--verbose", is_flag=True, default=False, help="Increase verbosity of output."
