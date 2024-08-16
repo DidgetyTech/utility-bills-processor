@@ -20,7 +20,7 @@ class ConversionDescriptor(Generic[T]):
 
     def __set_name__(self, owner: Any, name: str) -> None:
         """Invoked by Dataclass."""
-        self._name = "_" + name
+        self._name = f"_{name}"
 
     def __get__(self, obj: Any, type: type) -> T:
         """Invoked by Dataclass."""
@@ -31,5 +31,5 @@ class ConversionDescriptor(Generic[T]):
 
     def __set__(self, obj: Any, value: Any) -> None:
         """Invoked by Dataclass."""
-        converted_value: T = self._converter(value)
+        converted_value: T = self._converter(value) if value != self._default else value
         setattr(obj, self._name, converted_value)

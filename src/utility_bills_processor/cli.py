@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Final, Type
+from typing import Final
 
 import click
 import colorlog
@@ -35,7 +35,7 @@ def _configure_logging(level: int = logging.INFO) -> None:
     logger.addHandler(handler)
 
 
-def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
+def _base_command(scope: str, bill_subtype: type[Bill]) -> click.Command:
     """A factory function for defining bill processing commands.
 
     This function ensures consistent parameters and behavior of those parameters.
@@ -100,7 +100,7 @@ def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
                 raise click.ClickException(message) from error
         bills.sort(key=lambda b: b.date)
         click.echo("-" * 80)
-        print(", ".join(map(str, bills[0].to_header())))
+        print(",".join(map(str, bills[0].to_header())))
         for bill in bills:
             print(",".join(map(str, bill.to_row())))
 
