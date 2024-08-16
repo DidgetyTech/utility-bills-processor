@@ -33,6 +33,18 @@ TOTAL CURRENT CHARGES    $13.59
 """  # noqa: E501
 
 
+def _spaced_int(value: str | int) -> int:
+    if isinstance(value, str) and " " in value:
+        value = value.replace(" ", "")
+    return int(value)
+
+
+def _spaced_float(value: str | float) -> float:
+    if isinstance(value, str) and " " in value:
+        value = value.replace(" ", "")
+    return float(value)
+
+
 @dataclass
 class GasBill(Bill):
     """A Data Object representation of a Gas Bill."""
@@ -40,70 +52,71 @@ class GasBill(Bill):
     current_method: str
     previous_method: str
     days_since_last_reading: ConversionDescriptor = ConversionDescriptor(
-        _default=0, converter=int
+        _default=0, converter=_spaced_int
     )
     current_date: ConversionDescriptor = ConversionDescriptor(
         _default=datetime(1970, 1, 1),
         converter=lambda x: datetime.strptime(x, "%b %d %Y").date(),
     )
     current_meter_reading: ConversionDescriptor = ConversionDescriptor(
-        _default=0, converter=int
+        _default=0, converter=_spaced_int
     )
     previous_date: ConversionDescriptor = ConversionDescriptor(
         _default=datetime(1970, 1, 1),
         converter=lambda x: datetime.strptime(x, "%b %d %Y").date(),
     )
     previous_meter_reading: ConversionDescriptor = ConversionDescriptor(
-        _default=0, converter=int
+        _default=0, converter=_spaced_int
     )
     thermal_factor: ConversionDescriptor = ConversionDescriptor(
-        _default=0.0, converter=float
+        _default=0.0, converter=_spaced_float
     )
-    total_therms: ConversionDescriptor = ConversionDescriptor(_default=0, converter=int)
+    total_therms: ConversionDescriptor = ConversionDescriptor(
+        _default=0, converter=_spaced_int
+    )
     delivery_min_rate_usd: ConversionDescriptor = ConversionDescriptor(
-        _default=0, converter=float
+        _default=0, converter=_spaced_float
     )
     delivery_first_tier_rate_usd: ConversionDescriptor = ConversionDescriptor(
-        _default=0, converter=float
+        _default=0, converter=_spaced_float
     )
     delivery_distribution_adjustment_rate: ConversionDescriptor = ConversionDescriptor(
-        _default=0, converter=float
+        _default=0, converter=_spaced_float
     )
     delivery_total_usd: ConversionDescriptor = ConversionDescriptor(
-        _default=0, converter=float
+        _default=0, converter=_spaced_float
     )
     supply_rate: ConversionDescriptor = ConversionDescriptor(
-        _default=0, converter=float
+        _default=0, converter=_spaced_float
     )
     supply_total_usd: float = field(init=False)
     paperless_bill_credit_usd: ConversionDescriptor = ConversionDescriptor(
-        _default=0, converter=float
+        _default=0, converter=_spaced_float
     )
-    total_usd: ConversionDescriptor = ConversionDescriptor(_default=0, converter=float)
+    total_usd: ConversionDescriptor = ConversionDescriptor(
+        _default=0, converter=_spaced_float
+    )
 
     # expected by Bill
     _patterns: ClassVar[tuple[str, ...]] = (
         (
             r".*In (?P<days_since_last_reading>\d+) days"
             r".*(?P<current_date>[a-zA-Z]{3} [0-9]{2} 20\d{2}) reading"
-            r" (?P<current_method>[^\s]*)             (?P<current_meter_reading>\d+)"
+            r" (?P<current_method>[^\s]*)             (?P<current_meter_reading>[. 0-9]*\d+)"
             r".*(?P<previous_date>[a-zA-Z]{3} [0-9]{2} 20\d{2}) reading"
             r" (?P<previous_method>[^\s]*)"
-            r" *_* *(?P<previous_meter_reading>\d+)"
-            r".*Thermal Factor.*x(?P<thermal_factor>[\.0-9]+)"
-            r".*Total therms used *(?P<total_therms>\d+)"
-            r".*\$(?P<delivery_min_rate_usd>[\.0-9]+) per day for"
-            r" (?P=days_since_last_reading) days"
-            r".*First [\.0-9]+ therms @ \$(?P<delivery_first_tier_rate_usd>[\.0-9]+)"
+            r" *(_ ?)* *(?P<previous_meter_reading>[. 0-9]*\d)"
+            r".*Thermal Factor.*x(?P<thermal_factor>[. 0-9]*\d+)"
+            r".*Total therms used *(?P<total_therms>[. 0-9]*\d)"
+            r".*\$(?P<delivery_min_rate_usd>[.0-9]+) per day for"
+            r".*First [.0-9]+ therms @ \$(?P<delivery_first_tier_rate_usd>[.0-9]+)"
             r".*Distribution Adjustment"
-            r".*(?P=total_therms) therms x"
-            r" (?P<delivery_distribution_adjustment_rate>[\.0-9]+)"
-            r" per therm"
-            r".*GAS DELIVERY CHARGE.*\$(?P<delivery_total_usd>[\.0-9]+)"
+            r".*therms x (?P<delivery_distribution_adjustment_rate>[.0-9]+) per therm"
+            r".*GAS DELIVERY CHARGE.*\$(?P<delivery_total_usd>[. 0-9]*\d)"
             r".*GAS SUPPLY CHARGE"
-            r".*@ \$(?P<supply_rate>[\.0-9]+) /therm"
-            r".*Paperless Bill Credit.*(?P<paperless_bill_credit_usd>-[\.0-9]+)"
-            r".*TOTAL CURRENT CHARGES *\$(?P<total_usd>[\.0-9]+)"
+            r".*@ \$(?P<supply_rate>[.0-9]+) /therm"
+            r".*Paperless Bill Credit.*(?P<paperless_bill_credit_usd>-[. 0-9]*\d)"
+            r".*TOTAL CURRENT CHARGES *\$(?P<total_usd>[. 0-9]*\d)"
             r".*(IMPORTANT MESSAGES)?.*(ADDITIONAL MESSAGES)?"
             r".*"
         ),
