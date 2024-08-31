@@ -108,7 +108,7 @@ class WaterBill(Bill):
     @override
     def to_row(self) -> tuple[str | int | float, ...]:  # noqa: D102
         return (
-            self.read_date,
+            self.read_date.isoformat(),
             self.current_meter_reading,
             self.usage_type,
             self.usage,

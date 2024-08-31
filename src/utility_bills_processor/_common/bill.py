@@ -4,9 +4,11 @@ import logging
 import re
 from abc import abstractmethod
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, TypeVar
 
 from .readers import read_pdf
+
+B = TypeVar("B", bound="Bill")
 
 
 class Bill:
@@ -45,7 +47,7 @@ class Bill:
         return cls._header
 
     @classmethod
-    def extract_fields(cls, file: Path, password: str | None = None) -> "Bill":
+    def extract_fields(cls: type[B], file: Path, password: str | None = None) -> B:
         """Extract a Bill from the given PDF file.
 
         Args:
@@ -53,7 +55,7 @@ class Bill:
             password: the password to unlock an encrypted PDF file
 
         Returns:
-            a GasBill instance
+            a Bill instance
         """
         text = read_pdf(file, password)
 

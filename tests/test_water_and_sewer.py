@@ -7,7 +7,7 @@ from unittest import TestCase, main
 from utility_bills_processor.water_and_sewer import WaterBill
 
 DATA_ROOT = Path(__file__).parents[1].joinpath("tests_data")
-MUNICIPAL_BILL_PATH = DATA_ROOT.joinpath("municipal-water-sewer.pdf")
+BILL_PATH = DATA_ROOT.joinpath("municipal-water-sewer.pdf")
 
 
 class WaterBillTest(TestCase):
@@ -15,8 +15,8 @@ class WaterBillTest(TestCase):
 
     def test_extract_fields(self) -> None:
         """It extracts all the fields correctly from a real (redacted) PDF."""
-        bill: WaterBill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)  # type: ignore[assignment]
-        assert isinstance(bill, WaterBill)
+        bill = WaterBill.extract_fields(BILL_PATH)
+        self.assertIsInstance(bill, WaterBill)
         self.assertEqual(bill.adjustments, 0.0)
         self.assertEqual(bill.current_meter_reading, 743)
         self.assertEqual(bill.interest, 0.0)
@@ -30,13 +30,13 @@ class WaterBillTest(TestCase):
 
     def test_validate(self) -> None:
         """It validates all the fields correctly from a real (redacted) PDF."""
-        bill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)
+        bill = WaterBill.extract_fields(BILL_PATH)
         # doesn't raise an exception
         bill.validate()
 
     def test_validate_inaccurate_total(self) -> None:
         """It finds an issue when the total doesn't match the line values."""
-        bill: WaterBill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)  # type: ignore[assignment]
+        bill = WaterBill.extract_fields(BILL_PATH)
         bill.total = -100
         with self.assertRaises(ValueError):
             bill.validate()
@@ -61,11 +61,11 @@ class WaterBillTest(TestCase):
 
     def test_to_row(self) -> None:
         """It validates that the row has the correct values in the correct order."""
-        bill: WaterBill = WaterBill.extract_fields(MUNICIPAL_BILL_PATH)  # type: ignore[assignment]
+        bill = WaterBill.extract_fields(BILL_PATH)
         self.assertEqual(
             bill.to_row(),
             (
-                bill.read_date,
+                bill.read_date.isoformat(),
                 bill.current_meter_reading,
                 bill.usage_type,
                 bill.usage,
