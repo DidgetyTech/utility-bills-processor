@@ -4,9 +4,9 @@ import logging
 import re
 from abc import abstractmethod
 from pathlib import Path
-from typing import ClassVar, TypeVar
+from typing import ClassVar, Iterable, TypeVar
 
-from .readers import read_pdf
+from .readers import PdfReader, read_pdf
 
 B = TypeVar("B", bound="Bill")
 
@@ -38,6 +38,22 @@ class Bill:
         pass
 
     @classmethod
+    def pick_patterns(cls, text: str, reader: PdfReader) -> Iterable[str]:
+        """Pick which set of patterns to use.
+
+        Useful to override when the format of the bill has changed enough that the same regex can't
+        be used.
+
+        Args:
+            text: the text of the PDF
+            reader: the reader with other parsing information
+
+        Returns:
+            an iterable of pattern strings
+        """
+        return cls._patterns
+
+    @classmethod
     def to_header(cls) -> tuple[str, ...]:
         """Produce a TSV/CSV style row of header names.
 
@@ -57,10 +73,11 @@ class Bill:
         Returns:
             a Bill instance
         """
-        text = read_pdf(file, password)
+        text, reader = read_pdf(file, password)
+        patterns = cls.pick_patterns(text, reader)
 
         values = {}
-        for pattern in cls._patterns:
+        for pattern in patterns:
             match = re.search(pattern, text, flags=re.DOTALL)
             if match is None:
                 raise RuntimeError(

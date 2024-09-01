@@ -5,7 +5,7 @@ from pathlib import Path
 from pypdf import PdfReader
 
 
-def read_pdf(file: Path, password: str | None) -> str:
+def read_pdf(file: Path, password: str | None) -> tuple[str, PdfReader]:
     """Read PDF file that could be encrypted.
 
     Returns:
@@ -21,4 +21,4 @@ def read_pdf(file: Path, password: str | None) -> str:
             raise RuntimeError("Cannot read an encrypted document without a password")
         reader.decrypt(password)
     text = "\n\n".join((page.extract_text() for page in reader.pages))
-    return text
+    return text, reader
