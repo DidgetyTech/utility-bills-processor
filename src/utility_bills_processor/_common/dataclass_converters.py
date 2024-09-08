@@ -15,7 +15,7 @@ class ConversionDescriptor(Generic[T]):
             _default: the default value if one is not explicitly set
             converter: a function to convert the value to another value and/or type
         """
-        self._default = _default
+        self._default: T = _default
         self._converter = converter
 
     def __set_name__(self, owner: Any, name: str) -> None:
@@ -26,9 +26,10 @@ class ConversionDescriptor(Generic[T]):
         """Invoked by Dataclass."""
         if obj is None:
             return self._default
-
-        return getattr(obj, self._name)  # type: ignore[no-any-return]
+        value: T = getattr(obj, self._name)
+        return value
 
     def __set__(self, obj: Any, value: Any) -> None:
         """Invoked by Dataclass."""
-        setattr(obj, self._name, self._converter(value))
+        converted_value: T = self._converter(value)
+        setattr(obj, self._name, converted_value)

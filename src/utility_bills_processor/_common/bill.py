@@ -1,5 +1,6 @@
 """Contains the base Bill class for all utility bills."""
 
+import datetime
 import logging
 import re
 from abc import abstractmethod
@@ -16,6 +17,12 @@ class Bill:
 
     _patterns: ClassVar[tuple[str, ...]] = ("NOT SET ON SUBCLASS",)
     _header: ClassVar[tuple[str, ...]] = ("NOT SET ON SUBCLASS",)
+
+    @property
+    @abstractmethod
+    def date(self) -> datetime.date:
+        """The primary date for this bill."""
+        pass
 
     @abstractmethod
     def validate(self) -> None:

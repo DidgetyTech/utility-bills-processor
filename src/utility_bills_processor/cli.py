@@ -98,6 +98,7 @@ def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
                 message = f"Failed to process as a {scope} bill: {str(bill_file)}"
                 logging.error(f"{message}{_RESET_COLOR} {str(error)}")
                 raise click.ClickException(message) from error
+        bills.sort(key=lambda b: b.date)
         click.echo("-" * 80)
         print(", ".join(map(str, bills[0].to_header())))
         for bill in bills:

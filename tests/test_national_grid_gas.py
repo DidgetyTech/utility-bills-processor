@@ -59,6 +59,12 @@ def test_extract_fields() -> None:
     assert bill.total_usd == 19.25
 
 
+def test_date_set() -> None:
+    """It validates that the date property is the same as the current_date."""
+    bill = GasBill.extract_fields(BILL_PATH)
+    assert bill.date is bill.current_date
+
+
 def test_validate() -> None:
     """It validates all the fields correctly from a real (redacted) PDF."""
     bill = GasBill.extract_fields(OLD_BILL_PATH)

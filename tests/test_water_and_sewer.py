@@ -28,6 +28,11 @@ class WaterBillTest(TestCase):
         self.assertEqual(bill.usage_type, "Actual")
         self.assertEqual(bill.water_charge, 2.70)
 
+    def test_date_set(self) -> None:
+        """It validates that the date property is the same as the read_date."""
+        bill = WaterBill.extract_fields(BILL_PATH)
+        self.assertIs(bill.date, bill.read_date)
+
     def test_validate(self) -> None:
         """It validates all the fields correctly from a real (redacted) PDF."""
         bill = WaterBill.extract_fields(BILL_PATH)

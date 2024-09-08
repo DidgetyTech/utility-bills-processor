@@ -2,7 +2,7 @@
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import ClassVar, Iterable, override
 
 from ._common.bill import Bill
@@ -65,7 +65,7 @@ class GasBill(Bill):
         _default=0, converter=_spaced_int
     )
     current_date: ConversionDescriptor = ConversionDescriptor(
-        _default=datetime(1970, 1, 1),
+        _default=date(1970, 1, 1),
         converter=lambda x: (
             datetime.strptime(x, "%b %d, %Y")
             if "," in x
@@ -76,7 +76,7 @@ class GasBill(Bill):
         _default=0, converter=_spaced_int
     )
     previous_date: ConversionDescriptor = ConversionDescriptor(
-        _default=datetime(1970, 1, 1),
+        _default=date(1970, 1, 1),
         converter=lambda x: (
             datetime.strptime(x, "%b %d, %Y")
             if "," in x
@@ -204,6 +204,12 @@ class GasBill(Bill):
             self.supply_total_usd = round(self.total_therms * self.supply_rate_usd, 2)
         # TODO values that are inconsistent between layouts
 
+    @property
+    @override
+    def date(self) -> date:  # noqa: D102
+        d: date = self.current_date
+        return d
+
     @override
     def validate(self) -> None:  # noqa: D102
         # TODO validation with fields that are inconsistent between bill layouts
@@ -285,9 +291,9 @@ class GasBill(Bill):
     @override
     @classmethod
     def pick_patterns(cls, text: str, reader: PdfReader) -> Iterable[str]:  # noqa: D102
-        if len(reader.pages) == 2:
-            logging.debug("Found 2 pages -> using old patterns")
-            return cls._old_patterns
-        else:
+        if len(reader.pages) == 3:
             logging.debug("Using new patterns")
             return cls._current_patterns
+        else:
+            logging.debug("Found 2 pages -> using old patterns")
+            return cls._old_patterns

@@ -1,7 +1,7 @@
 """Extracts a TSV line (with header line) from my Water/Sewer Bill PDF."""
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from typing import ClassVar, override
 
 from ._common.bill import Bill
@@ -82,6 +82,13 @@ class WaterBill(Bill):
         "interest_usd",
         "total_usd",
     )
+
+    @property
+    @override
+    def date(self) -> date:  # noqa: D102
+        # ensure typing works
+        d: date = self.read_date
+        return d
 
     @override
     def validate(self) -> None:  # noqa: D102
