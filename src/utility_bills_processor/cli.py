@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Final, Type
+from typing import Final
 
 import click
 import colorlog
@@ -35,7 +35,7 @@ def _configure_logging(level: int = logging.INFO) -> None:
     logger.addHandler(handler)
 
 
-def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
+def _base_command(scope: str, bill_subtype: type[Bill]) -> click.Command:
     """A factory function for defining bill processing commands.
 
     This function ensures consistent parameters and behavior of those parameters.
@@ -100,7 +100,7 @@ def _base_command(scope: str, bill_subtype: Type[Bill]) -> click.Command:
                 raise click.ClickException(message) from error
         bills.sort(key=lambda b: b.date)
         click.echo("-" * 80)
-        print(", ".join(map(str, bills[0].to_header())))
+        print(",".join(map(str, bills[0].to_header())))
         for bill in bills:
             print(",".join(map(str, bill.to_row())))
 
@@ -125,10 +125,14 @@ def process_utility_bill(verbose: bool) -> None:
 
 def _generate_commands() -> None:
     # Defer importing bill classes as long as possible.
+    from .internet import InternetBill
     from .national_grid_gas import GasBill
     from .water_and_sewer import WaterBill
 
     process_utility_bill.add_command(_base_command("gas", GasBill), "gas")
+    process_utility_bill.add_command(
+        _base_command("internet", InternetBill), "internet"
+    )
     process_utility_bill.add_command(_base_command("water", WaterBill), "water")
 
 
