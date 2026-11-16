@@ -5,7 +5,7 @@ import logging
 import re
 from abc import abstractmethod
 from pathlib import Path
-from typing import ClassVar, Iterable, TypeVar
+from typing import ClassVar, TypeVar
 
 from .readers import PdfReader, read_pdf
 
@@ -45,7 +45,7 @@ class Bill:
         pass
 
     @classmethod
-    def pick_patterns(cls, text: str, reader: PdfReader) -> Iterable[str]:
+    def pick_patterns(cls, text: str, reader: PdfReader) -> tuple[str, ...]:
         """Pick which set of patterns to use.
 
         Useful to override when the format of the bill has changed enough that the same regex can't
@@ -84,8 +84,9 @@ class Bill:
         patterns = cls.pick_patterns(text, reader)
 
         values = {}
+        regexop = re.fullmatch if len(patterns) == 1 else re.search
         for pattern in patterns:
-            match = re.search(pattern, text, flags=re.DOTALL)
+            match = regexop(pattern, text, flags=re.DOTALL)
             if match is None:
                 raise RuntimeError(
                     f"Cannot parse bill with pattern: '{pattern}'. Found text:\n{text}"

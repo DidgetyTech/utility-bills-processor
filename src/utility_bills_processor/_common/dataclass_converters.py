@@ -31,5 +31,7 @@ class ConversionDescriptor(Generic[T]):
 
     def __set__(self, obj: Any, value: Any) -> None:
         """Invoked by Dataclass."""
-        converted_value: T = self._converter(value) if value != self._default else value
+        converted_value: T = (
+            self._converter(value) if value is not None else self._default
+        )
         setattr(obj, self._name, converted_value)

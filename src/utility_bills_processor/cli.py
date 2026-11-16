@@ -85,11 +85,25 @@ def _base_command(scope: str, bill_subtype: type[Bill]) -> click.Command:
         A BILL_FILE must be PDF and may be encrypted. Use --password to decrypt.
         """
         bills = []
+        errors = []
         for bill_file in bill_files:
+            logging.info(f"{bill_file}")
             try:
                 bill = bill_subtype.extract_fields(bill_file, password)
                 if check:
-                    bill.validate()
+                    try:
+                        bill.validate()
+                    except ValueError as error:
+                        logging.error(str(error))
+                        ignore = "y" == click.prompt(
+                            "Do you want to ignore this check?",
+                            type=click.Choice(("y", "n"), case_sensitive=False),
+                            default="n",
+                            show_default=True,
+                            show_choices=True,
+                        )
+                        if not ignore:
+                            raise error
                 else:
                     click.secho("Skipping data checks", fg="yellow")
                 bills.append(bill)
@@ -97,12 +111,14 @@ def _base_command(scope: str, bill_subtype: type[Bill]) -> click.Command:
             except RuntimeError as error:
                 message = f"Failed to process as a {scope} bill: {str(bill_file)}"
                 logging.error(f"{message}{_RESET_COLOR} {str(error)}")
-                raise click.ClickException(message) from error
+                errors.append((message, error))
         bills.sort(key=lambda b: b.date)
         click.echo("-" * 80)
         print(",".join(map(str, bills[0].to_header())))
         for bill in bills:
             print(",".join(map(str, bill.to_row())))
+        if errors:
+            raise click.ClickException("Encountered processing errors. See above.")
 
     return command
 
